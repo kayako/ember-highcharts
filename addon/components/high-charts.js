@@ -73,7 +73,22 @@ export default Component.extend({
         return chartSeriesToRemove.push(series);
       }
 
-      series.setData(contentSeries.data, false);
+      var updatedKeys = Object.keys(contentSeries).filter(key => {
+        var isValidKey = key !== 'data' && key.charAt(0) !== '_';
+        var isValidType = ['object', 'function'].indexOf(typeof contentSeries[key]) === -1;
+        var isTheSame = contentSeries[key] === series[key];
+
+        return isValidKey && isValidType && !isTheSame;
+      });
+
+      // call series.update() when other series attributes like pointStart have changed
+      if (updatedKeys.length) {
+        series.update(contentSeries, false);
+      }
+      else {
+        series.setData(contentSeries.data, false);
+      }
+
     });
 
     chartSeriesToRemove.forEach((series) => series.remove(false));
